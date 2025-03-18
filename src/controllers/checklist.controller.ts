@@ -160,4 +160,37 @@ checklist.delete("/:id/item/:itemId", async (c) => {
   return c.json({ success: true, message: "Item status has been deleted" });
 });
 
+checklist.put(
+  "/:id/item/rename/:itemId",
+  zValidator("json", createChecklistItemValidator),
+  async (c) => {
+    const { sub: userId } = c.get("jwtPayload");
+    const checklistId = c.req.param("id");
+    const itemId = c.req.param("itemId");
+    const payload = c.req.valid("json");
+
+    const item = await prisma.item.findUnique({
+      where: {
+        userId,
+        checklistId: Number(checklistId),
+        id: Number(itemId),
+      },
+    });
+    if (!item) {
+      throw new HTTPException(404, { message: "Item is not found" });
+    }
+
+    await prisma.item.update({
+      where: {
+        id: item.id,
+      },
+      data: {
+        itemName: payload.itemName,
+      },
+    });
+
+    return c.json({ success: true, message: "Item status has been renamed" });
+  },
+);
+
 export default checklist;
