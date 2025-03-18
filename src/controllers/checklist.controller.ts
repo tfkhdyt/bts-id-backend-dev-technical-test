@@ -5,8 +5,8 @@ import {
   createChecklistValidator,
 } from "../validators/checklist.validator.js";
 import { jwt, type JwtVariables } from "hono/jwt";
-import { prisma } from "../lib/prisma.js";
-import { HTTPException } from "hono/http-exception";
+import * as checklistRepository from "../repositories/checklist.repository.js";
+import * as checklistItemRepository from "../repositories/checklist-item.repository.js";
 
 const checklist = new Hono<{ Variables: JwtVariables<{ sub: number }> }>();
 
@@ -18,12 +18,7 @@ checklist.post("/", zValidator("json", createChecklistValidator), async (c) => {
   const payload = c.req.valid("json");
   const { sub: userId } = c.get("jwtPayload");
 
-  await prisma.checklist.create({
-    data: {
-      name: payload.name,
-      userId,
-    },
-  });
+  await checklistRepository.createChecklist(payload.name, userId);
 
   return c.json(
     { success: true, message: "Checklist created successfully" },
@@ -34,11 +29,7 @@ checklist.post("/", zValidator("json", createChecklistValidator), async (c) => {
 checklist.get("/", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
 
-  const checklists = await prisma.checklist.findMany({
-    where: {
-      userId,
-    },
-  });
+  const checklists = await checklistRepository.findAllChecklist(userId);
 
   return c.json({ success: true, data: checklists });
 });
@@ -47,7 +38,7 @@ checklist.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const { sub: userId } = c.get("jwtPayload");
 
-  await prisma.checklist.delete({ where: { id: Number(id), userId } });
+  await checklistRepository.deleteChecklist(Number(id), userId);
 
   return c.json({ success: true, message: "Checklist deleted successfully" });
 });
@@ -62,13 +53,11 @@ checklist.post(
     const { sub: userId } = c.get("jwtPayload");
     const checklistId = c.req.param("id");
 
-    await prisma.item.create({
-      data: {
-        itemName: payload.itemName,
-        userId,
-        checklistId: Number(checklistId),
-      },
-    });
+    await checklistItemRepository.createChecklistItem(
+      payload.itemName,
+      userId,
+      Number(checklistId),
+    );
 
     return c.json({ success: true, message: "Item created successfully" }, 201);
   },
@@ -78,12 +67,10 @@ checklist.get("/:id/item", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
   const checklistId = c.req.param("id");
 
-  const items = await prisma.item.findMany({
-    where: {
-      userId,
-      checklistId: Number(checklistId),
-    },
-  });
+  const items = await checklistItemRepository.findAllChecklistItems(
+    userId,
+    Number(checklistId),
+  );
 
   return c.json({ success: true, data: items });
 });
@@ -93,16 +80,11 @@ checklist.get("/:id/item/:itemId", async (c) => {
   const checklistId = c.req.param("id");
   const itemId = c.req.param("itemId");
 
-  const item = await prisma.item.findUnique({
-    where: {
-      userId,
-      checklistId: Number(checklistId),
-      id: Number(itemId),
-    },
-  });
-  if (!item) {
-    throw new HTTPException(404, { message: "Item is not found" });
-  }
+  const item = await checklistItemRepository.findOneChecklistItem(
+    Number(itemId),
+    userId,
+    Number(checklistId),
+  );
 
   return c.json({ success: true, data: item });
 });
@@ -112,24 +94,14 @@ checklist.put("/:id/item/:itemId", async (c) => {
   const checklistId = c.req.param("id");
   const itemId = c.req.param("itemId");
 
-  const item = await prisma.item.findUnique({
-    where: {
-      userId,
-      checklistId: Number(checklistId),
-      id: Number(itemId),
-    },
-  });
-  if (!item) {
-    throw new HTTPException(404, { message: "Item is not found" });
-  }
+  const item = await checklistItemRepository.findOneChecklistItem(
+    Number(itemId),
+    userId,
+    Number(checklistId),
+  );
 
-  await prisma.item.update({
-    where: {
-      id: item.id,
-    },
-    data: {
-      isDone: !item.isDone,
-    },
+  await checklistItemRepository.updateChecklistItem(item.id, {
+    isDone: !item.isDone,
   });
 
   return c.json({ success: true, message: "Item status has been updated" });
@@ -140,22 +112,13 @@ checklist.delete("/:id/item/:itemId", async (c) => {
   const checklistId = c.req.param("id");
   const itemId = c.req.param("itemId");
 
-  const item = await prisma.item.findUnique({
-    where: {
-      userId,
-      checklistId: Number(checklistId),
-      id: Number(itemId),
-    },
-  });
-  if (!item) {
-    throw new HTTPException(404, { message: "Item is not found" });
-  }
+  const item = await checklistItemRepository.findOneChecklistItem(
+    Number(itemId),
+    userId,
+    Number(checklistId),
+  );
 
-  await prisma.item.delete({
-    where: {
-      id: item.id,
-    },
-  });
+  await checklistItemRepository.deleteChecklistItem(item.id);
 
   return c.json({ success: true, message: "Item status has been deleted" });
 });
@@ -169,24 +132,14 @@ checklist.put(
     const itemId = c.req.param("itemId");
     const payload = c.req.valid("json");
 
-    const item = await prisma.item.findUnique({
-      where: {
-        userId,
-        checklistId: Number(checklistId),
-        id: Number(itemId),
-      },
-    });
-    if (!item) {
-      throw new HTTPException(404, { message: "Item is not found" });
-    }
+    const item = await checklistItemRepository.findOneChecklistItem(
+      Number(itemId),
+      userId,
+      Number(checklistId),
+    );
 
-    await prisma.item.update({
-      where: {
-        id: item.id,
-      },
-      data: {
-        itemName: payload.itemName,
-      },
+    await checklistItemRepository.updateChecklistItem(item.id, {
+      itemName: payload.itemName,
     });
 
     return c.json({ success: true, message: "Item status has been renamed" });
