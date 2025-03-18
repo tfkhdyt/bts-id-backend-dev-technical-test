@@ -16,6 +16,7 @@ model User {
   password   String
   username   String
   checklists Checklist[]
+  Item       Item[]
 
   @@map("users")
 }
@@ -25,6 +26,19 @@ model Checklist {
   userId Int
   user   User   @relation(fields: [userId], references: [id])
   name   String
+  Item   Item[]
 
   @@map("checklists")
+}
+
+model Item {
+  id          Int       @id @default(autoincrement())
+  checklistId Int
+  checklist   Checklist @relation(fields: [checklistId], references: [id])
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  itemName    String
+  isDone      Boolean   @default(false)
+
+  @@map("items")
 }
