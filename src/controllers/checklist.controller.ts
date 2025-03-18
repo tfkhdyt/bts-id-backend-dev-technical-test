@@ -14,6 +14,7 @@ checklist.use(jwt({ secret: process.env.JWT_SECRET ?? "secret" }));
 
 // checklist ======================================================================
 
+// create
 checklist.post("/", zValidator("json", createChecklistValidator), async (c) => {
   const payload = c.req.valid("json");
   const { sub: userId } = c.get("jwtPayload");
@@ -26,6 +27,7 @@ checklist.post("/", zValidator("json", createChecklistValidator), async (c) => {
   );
 });
 
+// find all
 checklist.get("/", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
 
@@ -34,6 +36,7 @@ checklist.get("/", async (c) => {
   return c.json({ success: true, data: checklists });
 });
 
+// find one
 checklist.delete("/:id", async (c) => {
   const id = c.req.param("id");
   const { sub: userId } = c.get("jwtPayload");
@@ -45,6 +48,7 @@ checklist.delete("/:id", async (c) => {
 
 // checklist item =================================================================
 
+// create
 checklist.post(
   "/:id/item",
   zValidator("json", createChecklistItemValidator),
@@ -63,6 +67,7 @@ checklist.post(
   },
 );
 
+// find all
 checklist.get("/:id/item", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
   const checklistId = c.req.param("id");
@@ -75,6 +80,7 @@ checklist.get("/:id/item", async (c) => {
   return c.json({ success: true, data: items });
 });
 
+// find one
 checklist.get("/:id/item/:itemId", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
   const checklistId = c.req.param("id");
@@ -89,6 +95,7 @@ checklist.get("/:id/item/:itemId", async (c) => {
   return c.json({ success: true, data: item });
 });
 
+// toggle status
 checklist.put("/:id/item/:itemId", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
   const checklistId = c.req.param("id");
@@ -107,6 +114,7 @@ checklist.put("/:id/item/:itemId", async (c) => {
   return c.json({ success: true, message: "Item status has been updated" });
 });
 
+// delete
 checklist.delete("/:id/item/:itemId", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
   const checklistId = c.req.param("id");
@@ -123,6 +131,7 @@ checklist.delete("/:id/item/:itemId", async (c) => {
   return c.json({ success: true, message: "Item status has been deleted" });
 });
 
+// rename
 checklist.put(
   "/:id/item/rename/:itemId",
   zValidator("json", createChecklistItemValidator),
