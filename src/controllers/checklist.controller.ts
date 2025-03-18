@@ -37,4 +37,13 @@ checklist.get("/", async (c) => {
   return c.json({ success: true, data: checklists });
 });
 
+checklist.delete("/:id", async (c) => {
+  const id = c.req.param("id");
+  const { sub: userId } = c.get("jwtPayload");
+
+  await prisma.checklist.delete({ where: { id: Number(id), userId } });
+
+  return c.json({ success: true, message: "Checklist deleted successfully" });
+});
+
 export default checklist;
