@@ -34,6 +34,20 @@ export async function findAllChecklist(userId: number) {
   }
 }
 
+export async function findOneChecklist(userId: number, id: number) {
+  const checklist = await prisma.checklist.findUnique({
+    where: {
+      userId,
+      id,
+    },
+  });
+  if (!checklist) {
+    throw new HTTPException(404, { message: "Checklist is not found" });
+  }
+
+  return checklist;
+}
+
 export async function deleteChecklist(id: number, userId: number) {
   try {
     await prisma.checklist.delete({ where: { id, userId } });

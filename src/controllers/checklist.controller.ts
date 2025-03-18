@@ -57,10 +57,15 @@ checklist.post(
     const { sub: userId } = c.get("jwtPayload");
     const checklistId = c.req.param("id");
 
+    const checkList = await checklistRepository.findOneChecklist(
+      userId,
+      Number(checklistId),
+    );
+
     await checklistItemRepository.createChecklistItem(
       payload.itemName,
       userId,
-      Number(checklistId),
+      checkList.id,
     );
 
     return c.json({ success: true, message: "Item created successfully" }, 201);
@@ -72,9 +77,14 @@ checklist.get("/:id/item", async (c) => {
   const { sub: userId } = c.get("jwtPayload");
   const checklistId = c.req.param("id");
 
-  const items = await checklistItemRepository.findAllChecklistItems(
+  const checkList = await checklistRepository.findOneChecklist(
     userId,
     Number(checklistId),
+  );
+
+  const items = await checklistItemRepository.findAllChecklistItems(
+    userId,
+    checkList.id,
   );
 
   return c.json({ success: true, data: items });
@@ -86,10 +96,15 @@ checklist.get("/:id/item/:itemId", async (c) => {
   const checklistId = c.req.param("id");
   const itemId = c.req.param("itemId");
 
+  const checkList = await checklistRepository.findOneChecklist(
+    userId,
+    Number(checklistId),
+  );
+
   const item = await checklistItemRepository.findOneChecklistItem(
     Number(itemId),
     userId,
-    Number(checklistId),
+    checkList.id,
   );
 
   return c.json({ success: true, data: item });
@@ -101,10 +116,15 @@ checklist.put("/:id/item/:itemId", async (c) => {
   const checklistId = c.req.param("id");
   const itemId = c.req.param("itemId");
 
+  const checkList = await checklistRepository.findOneChecklist(
+    userId,
+    Number(checklistId),
+  );
+
   const item = await checklistItemRepository.findOneChecklistItem(
     Number(itemId),
     userId,
-    Number(checklistId),
+    checkList.id,
   );
 
   await checklistItemRepository.updateChecklistItem(item.id, {
@@ -120,10 +140,15 @@ checklist.delete("/:id/item/:itemId", async (c) => {
   const checklistId = c.req.param("id");
   const itemId = c.req.param("itemId");
 
+  const checkList = await checklistRepository.findOneChecklist(
+    userId,
+    Number(checklistId),
+  );
+
   const item = await checklistItemRepository.findOneChecklistItem(
     Number(itemId),
     userId,
-    Number(checklistId),
+    checkList.id,
   );
 
   await checklistItemRepository.deleteChecklistItem(item.id);
@@ -141,10 +166,15 @@ checklist.put(
     const itemId = c.req.param("itemId");
     const payload = c.req.valid("json");
 
+    const checkList = await checklistRepository.findOneChecklist(
+      userId,
+      Number(checklistId),
+    );
+
     const item = await checklistItemRepository.findOneChecklistItem(
       Number(itemId),
       userId,
-      Number(checklistId),
+      checkList.id,
     );
 
     await checklistItemRepository.updateChecklistItem(item.id, {
