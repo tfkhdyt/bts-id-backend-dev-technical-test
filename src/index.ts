@@ -1,9 +1,9 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import auth from "./controllers/auth.controller.js";
-import checklist from "./controllers/checklist.controller.js";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
+import auth from "./controllers/auth.controller.js";
+import checklist from "./controllers/checklist.controller.js";
 
 const app = new Hono().basePath("/api");
 
@@ -20,7 +20,7 @@ app.onError((err, c) => {
       success: false,
       message: err.message,
     },
-    statusCode,
+    statusCode
   );
 });
 app.route("", auth);
@@ -33,5 +33,5 @@ serve(
   },
   (info) => {
     console.log(`Server is running on http://localhost:${info.port}`);
-  },
+  }
 );

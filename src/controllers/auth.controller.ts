@@ -20,7 +20,7 @@ auth.post("/register", zValidator("json", registerValidator), async (c) => {
 
   return c.json(
     { success: true, message: "User registered successfully" },
-    201,
+    201
   );
 });
 

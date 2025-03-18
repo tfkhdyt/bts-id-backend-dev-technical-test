@@ -2,6 +2,8 @@
   "name": "technical-test-bts-id",
   "type": "module",
   "scripts": {
+    "start": "node ./build/index.js",
+    "build": "tsc",
     "dev": "tsx watch src/index.ts"
   },
   "dependencies": {
@@ -16,13 +18,16 @@
   "devDependencies": {
     "@types/node": "^20.11.17",
     "prisma": "^6.5.0",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.2"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@prisma/client",
       "@prisma/engines",
       "argon2",
       "prisma"
     ]
   }
 }
+

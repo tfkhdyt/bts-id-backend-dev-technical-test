@@ -1,12 +1,12 @@
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
+import { jwt, type JwtVariables } from "hono/jwt";
+import * as checklistItemRepository from "../repositories/checklist-item.repository.js";
+import * as checklistRepository from "../repositories/checklist.repository.js";
 import {
   createChecklistItemValidator,
   createChecklistValidator,
 } from "../validators/checklist.validator.js";
-import { jwt, type JwtVariables } from "hono/jwt";
-import * as checklistRepository from "../repositories/checklist.repository.js";
-import * as checklistItemRepository from "../repositories/checklist-item.repository.js";
 
 const checklist = new Hono<{ Variables: JwtVariables<{ sub: number }> }>();
 
@@ -23,7 +23,7 @@ checklist.post("/", zValidator("json", createChecklistValidator), async (c) => {
 
   return c.json(
     { success: true, message: "Checklist created successfully" },
-    201,
+    201
   );
 });
 
@@ -59,17 +59,17 @@ checklist.post(
 
     const checkList = await checklistRepository.findOneChecklist(
       userId,
-      Number(checklistId),
+      Number(checklistId)
     );
 
     await checklistItemRepository.createChecklistItem(
       payload.itemName,
       userId,
-      checkList.id,
+      checkList.id
     );
 
     return c.json({ success: true, message: "Item created successfully" }, 201);
-  },
+  }
 );
 
 // find all
@@ -79,12 +79,12 @@ checklist.get("/:id/item", async (c) => {
 
   const checkList = await checklistRepository.findOneChecklist(
     userId,
-    Number(checklistId),
+    Number(checklistId)
   );
 
   const items = await checklistItemRepository.findAllChecklistItems(
     userId,
-    checkList.id,
+    checkList.id
   );
 
   return c.json({ success: true, data: items });
@@ -98,13 +98,13 @@ checklist.get("/:id/item/:itemId", async (c) => {
 
   const checkList = await checklistRepository.findOneChecklist(
     userId,
-    Number(checklistId),
+    Number(checklistId)
   );
 
   const item = await checklistItemRepository.findOneChecklistItem(
     Number(itemId),
     userId,
-    checkList.id,
+    checkList.id
   );
 
   return c.json({ success: true, data: item });
@@ -118,13 +118,13 @@ checklist.put("/:id/item/:itemId", async (c) => {
 
   const checkList = await checklistRepository.findOneChecklist(
     userId,
-    Number(checklistId),
+    Number(checklistId)
   );
 
   const item = await checklistItemRepository.findOneChecklistItem(
     Number(itemId),
     userId,
-    checkList.id,
+    checkList.id
   );
 
   await checklistItemRepository.updateChecklistItem(item.id, {
@@ -142,13 +142,13 @@ checklist.delete("/:id/item/:itemId", async (c) => {
 
   const checkList = await checklistRepository.findOneChecklist(
     userId,
-    Number(checklistId),
+    Number(checklistId)
   );
 
   const item = await checklistItemRepository.findOneChecklistItem(
     Number(itemId),
     userId,
-    checkList.id,
+    checkList.id
   );
 
   await checklistItemRepository.deleteChecklistItem(item.id);
@@ -168,13 +168,13 @@ checklist.put(
 
     const checkList = await checklistRepository.findOneChecklist(
       userId,
-      Number(checklistId),
+      Number(checklistId)
     );
 
     const item = await checklistItemRepository.findOneChecklistItem(
       Number(itemId),
       userId,
-      checkList.id,
+      checkList.id
     );
 
     await checklistItemRepository.updateChecklistItem(item.id, {
@@ -182,7 +182,7 @@ checklist.put(
     });
 
     return c.json({ success: true, message: "Item status has been renamed" });
-  },
+  }
 );
 
 export default checklist;

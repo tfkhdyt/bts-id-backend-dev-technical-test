@@ -1,11 +1,11 @@
+import type { Prisma } from "@prisma/client";
 import { HTTPException } from "hono/http-exception";
 import { prisma } from "../lib/prisma.js";
-import type { Prisma } from "@prisma/client";
 
 export async function createChecklistItem(
   itemName: string,
   userId: number,
-  checklistId: number,
+  checklistId: number
 ) {
   try {
     await prisma.item.create({
@@ -25,7 +25,7 @@ export async function createChecklistItem(
 
 export async function findAllChecklistItems(
   userId: number,
-  checklistId: number,
+  checklistId: number
 ) {
   try {
     const items = await prisma.item.findMany({
@@ -47,7 +47,7 @@ export async function findAllChecklistItems(
 export async function findOneChecklistItem(
   id: number,
   userId: number,
-  checklistId: number,
+  checklistId: number
 ) {
   const item = await prisma.item.findUnique({
     where: {
@@ -65,7 +65,7 @@ export async function findOneChecklistItem(
 
 export async function updateChecklistItem(
   itemId: number,
-  data: Prisma.ItemUpdateInput,
+  data: Prisma.ItemUpdateInput
 ) {
   try {
     await prisma.item.update({
