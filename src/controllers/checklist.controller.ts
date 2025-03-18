@@ -107,4 +107,34 @@ checklist.get("/:id/item/:itemId", async (c) => {
   return c.json({ success: true, data: item });
 });
 
+checklist.put("/:id/item/:itemId", async (c) => {
+  const { sub: userId } = c.get("jwtPayload");
+  const checklistId = c.req.param("id");
+  const itemId = c.req.param("itemId");
+
+  const item = await prisma.item.findUnique({
+    where: {
+      userId,
+      checklistId: Number(checklistId),
+      id: Number(itemId),
+    },
+  });
+  if (!item) {
+    throw new HTTPException(404, { message: "Item is not found" });
+  }
+
+  await prisma.item.update({
+    where: {
+      userId,
+      checklistId: Number(checklistId),
+      id: Number(itemId),
+    },
+    data: {
+      isDone: !item.isDone,
+    },
+  });
+
+  return c.json({ success: true, message: "Item status has been updated" });
+});
+
 export default checklist;
